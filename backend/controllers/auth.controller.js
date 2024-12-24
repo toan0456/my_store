@@ -69,15 +69,50 @@ export const signin = async (req, res) => {
         data: { id:user._id, name: user.name, email: user.email, role: user.role },
       });
   } catch (error) {
-    console.log(error);
+    console.log("signin controller", error.message);
     res.status(500).json({ message: error.message });
   }
 };
 
 export const login = async (req, res) => {
-  res.send("login router called");
+    try {
+        const { email, password } = req.body;
+    const user = await userModel.findOne({ email: email})
+    if (!user) {
+        return res.status(400).json({ message: "Email khong ton tai" });
+    }
+    const checkPass = await bcrypt.compare( password, user.password )
+    if (!checkPass) {
+        return res.status(400).json({ message: "Mat khau khong dung" });
+    }
+
+    const { accessToken, refreshToken } = generateTokens(user._id);
+    await storeRefreshToken(user._id, refreshToken);
+
+    setCookies(res, accessToken, refreshToken);
+
+    res.status(200).json({
+        message: "Dang nhap thanh cong",
+        data: { id:user._id, name: user.name, email: user.email, role: user.role },
+      });
+    } catch (error) {
+        console.log("Lỗi login controller", error.message);
+        res.status(500).json({ message: error.message });
+    }
 };
 
 export const logout = async (req, res) => {
-  res.send("logout router called");
+  try {
+    const refresh_token = req.cookies.refreshToken;
+    if (refresh_token) {
+        const decoded = jwt.verify(refresh_token, process.env.REFRESH_TOKEN_SECRET);
+        await redis.del(`refresh_token:${decoded.userId}`);
+    }
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+    res.status(200).json({ message: "Logout thanh cong" });
+  } catch (error) {
+    console.log("Logout controller", error.message);
+    res.status(500).json({ message:"Lỗi server", error: error.message });
+  }
 };
