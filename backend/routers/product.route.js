@@ -8,8 +8,8 @@ router.get(`/`, protecRoute, adminRoute, getAllProducts)
 router.get(`/featured`, getFeaturedProducts)
 router.get(`/category/:category`, getProductsByCategory)
 router.get(`/recomendation`, getRecomentProducts)
-router.post(`/createProducts`, protecRoute, adminRoute, createProducts)
-router.patch(`/togProduct/:id`, protecRoute, adminRoute, toggleFeatureProduct)
-router.delete(`/deleteProducts/:id`, protecRoute, adminRoute, deleteProducts)
+router.post(`/add-product`, protecRoute, adminRoute, createProducts)
+router.patch(`/toggle-featured-product/:id`, protecRoute, adminRoute, toggleFeatureProduct)
+router.delete(`/delete-products/:id`, protecRoute, adminRoute, deleteProducts)
 
 export default router
