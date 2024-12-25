@@ -146,4 +146,10 @@ export const refresh_Token = async (req, res) => {
     }
 }
 //TODO get profile
-export const getprofile = async (req, res) => {}
+export const getprofile = async (req, res) => {
+  try {
+    res.status(200).json(req.user)
+  } catch (error) {
+    res.status(500).json({ message:"Lỗi server", error: error.message });
+  }
+}
