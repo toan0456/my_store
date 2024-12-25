@@ -116,3 +116,34 @@ export const logout = async (req, res) => {
     res.status(500).json({ message:"Lỗi server", error: error.message });
   }
 };
+
+export const refresh_Token = async (req, res) => {
+    try {
+        const refresh_token = req.cookies.refreshToken;
+        if (!refresh_token) {
+            return res.status(401).json({ message: "Refresh token khong ton tai" });
+        }
+
+        const decoded = jwt.verify(refresh_token, process.env.REFRESH_TOKEN_SECRET);
+        const storedToken = await redis.get(`refresh_token:${decoded.userId}`);
+
+        if (storedToken !== refresh_token) {
+            return res.status(401).json({ message: "Refresh token khong hop le" });
+        }
+
+        const accessToken = jwt.sign({ userId: decoded.userId }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" });
+
+        res.cookie("accessToken", accessToken, {
+            httpOnly: true, // prevent XSS attack, cross site scripting attack
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict", // prevent CSRF attack, cross site request forgery attack
+            maxAge: 15 * 60 * 1000, // 15 phut
+        });
+        res.status(200).json({ message: "Refresh token thanh cong" });
+    } catch (error) {
+        console.log("Refresh token controller", error.message);
+        res.status(500).json({ message:"Lỗi server", error: error.message });
+    }
+}
+//TODO get profile
+export const getprofile = async (req, res) => {}
