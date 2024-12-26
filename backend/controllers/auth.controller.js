@@ -40,7 +40,7 @@ const setCookies = (res, accessToken, refreshToken) => {
     });
 };
 
-export const signin = async (req, res) => {
+export const signup = async (req, res) => {
   try {
     const { name, email, password } = req.body;
     const checkEmail = await userModel.findOne({ email: email });
@@ -69,7 +69,7 @@ export const signin = async (req, res) => {
         data: { id:user._id, name: user.name, email: user.email, role: user.role },
       });
   } catch (error) {
-    console.log("signin controller", error.message);
+    console.log("signup controller", error.message);
     res.status(500).json({ message: error.message });
   }
 };
