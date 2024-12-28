@@ -31,6 +31,7 @@ export const useUserStore = create((set, get)=>( {
         try {
             const res = await axios.post("/auth/login", { email, password})
             set({ user: res.data, loading: false })
+            toast.success("Dang nhap thanh cong")
         } catch (error) {
             console.log(error)
             set({ loading: false })

@@ -5,7 +5,8 @@ import { useUserStore } from "../store/useUserStore";
 
 const Navbar = () => {
   const {user, logout} = useUserStore();
-  const isAdmin = user?.role === "admin";
+  // console.log("user:", user)
+  // const isAdmin = user?.role === "admin";
 
   return (
     <>
@@ -48,7 +49,7 @@ const Navbar = () => {
                   )} */}
                 </Link>
               )}
-              {isAdmin && (
+              { user && user?.role === "admin" && (
                 <Link
                   className="bg-emerald-700 hover:bg-emerald-600 text-white px-3 py-1 rounded-md font-medium
 								 transition duration-300 ease-in-out flex items-center"

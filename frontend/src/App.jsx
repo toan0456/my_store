@@ -8,6 +8,7 @@ import Navbar from "./components/Navbar";
 import { Toaster } from "react-hot-toast";
 import { useUserStore } from "./store/useUserStore";
 import LoadingSpinner from "./components/LoadingSpinner";
+import AdminPage from "./Pages/AdminPage";
 
 function App() {
 
@@ -36,6 +37,8 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/signup" element={!user ?<SignupPage /> : <Navigate to={`/`} />} />
           <Route path="/login" element={ !user ? <LoginPage /> : <Navigate to={`/`} /> } />
+          <Route path="/secret-dashboard" element={ user?.role === "admin" ? <AdminPage /> : <Navigate to={`/login`} /> } />
+          {/* /secret-dashboard */}
         </Routes>
         </div >
         <Toaster />
