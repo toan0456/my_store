@@ -7,6 +7,7 @@ export const useCartStore = create((set, get)=>( {
     coupon: null,
     total: 0,
     subtotal:0,
+    isCouponApplied: false,
 
     getCartItem: async()=> {
         try {
@@ -42,6 +43,16 @@ export const useCartStore = create((set, get)=>( {
         await axios.delete(`/cart`, {data: {productId: id}})
         set((preState)=> ({
             cart: preState.cart.filter((item)=> item._id !== id)
+        }))
+        get().caculateTotal()
+    },
+    updateQuantity: async(id, quantity)=> {
+        if (quantity === 0) {
+            return get().removeFromCart(id)
+        }
+        await axios.put(`/cart/${id}`, {quantity: quantity})
+        set((preState)=> ({
+            cart: preState.cart.map((item)=> item._id === id ? {...item, quantity} : item)
         }))
         get().caculateTotal()
     },
