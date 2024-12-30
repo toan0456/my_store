@@ -3,7 +3,7 @@ import couponModel from "../models/coupon.model.js"
 export const getCoupon = async (req, res) => {
     try {
         const coupon = await couponModel.findOne({userId: req.user._id, isActive: true})
-        res.status(200).json(coupon|| null)
+        res.status(200).json(coupon || null)
     } catch (error) {
         console.log("Lỗi server get coupon", error.message);
         res.status(500).json({ message:"Lỗi server", error: error.message});

@@ -77,4 +77,14 @@ export const useProductStore = create((set)=> ({
             toast.error(error.response.data.message || "Lỗi server")
         }
     },
+    fetchFeaturedProducts: async()=> {
+        set({ loading: true})
+        try {
+            const res = await axiosInstance.get("/product/featured")
+            set({products: res.data.data, loading: false})
+        } catch (error) {
+            set({loading: false})
+            toast.error(error.response.data.message || "Lỗi server")
+        }
+    }
 }))

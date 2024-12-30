@@ -13,7 +13,7 @@ const orderSchema = new mongoose.Schema({
                 ref: "Products",
                 required: true
             },
-            quatity: {
+            quantity: {
                 type: Number,
                 required: true,
                 min: 1

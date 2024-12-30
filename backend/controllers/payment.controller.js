@@ -24,7 +24,8 @@ export const createCheckoutSession = async (req, res) => {
                         images: [product.images]
                     },
                     unit_amount: amount
-                }
+                },
+                quantity: product.quantity || 1,
             }
         })
 
@@ -60,7 +61,7 @@ export const createCheckoutSession = async (req, res) => {
             }
         })
 
-        if (totalAmount >= 20000) {
+        if (totalAmount >= 2000) {
             await createNewCoupon(req.user._id)
         }
 
@@ -80,12 +81,14 @@ const createStripeCoupon = async (discountPercentage)=> {
 }
 
 async function createNewCoupon(userId) {
-    const newCoupon = new couponModel({
-        code: "GIF"+ Math.random().toString(36).substring(2, 8).toUpperCase(),
-        discountPercentage: 10,
-        expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        userId: userId,
-    })
+    await Coupon.findOneAndDelete({ userId });
+
+	const newCoupon = new couponModel({
+		code: "GIFT" + Math.random().toString(36).substring(2, 8).toUpperCase(),
+		discountPercentage: 10,
+		expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+		userId: userId,
+	});
     await newCoupon.save();
 
     return newCoupon
@@ -94,36 +97,42 @@ async function createNewCoupon(userId) {
 export const checkoutSuccess = async (req, res) => {
     try {
         const { sessionId } = req.body;
-        const session = await stripe.checkout.sessions.retrieve(sessionId);
+		const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-        if (session.payment_status === "paid") {
-            if (session.metadata.couponCode) {
-                await couponModel.findByIdAndUpdate({
-                    code: session.metadata.couponCode, userId: session.metadata.userId
-                }, {
-                    isActive: false
-                })
-            }
-            // create order
-            const products = JSON.parse(session.metadata.products)
-            const newOrder = new orderModel({
-                user: session.metadata.userId,
-                products: products.map((p)=> ({
-                    products:p.id,
-                    quantity:p.quantity,
-                    price:p.price
-                })),
-                totalAmount: session.amount_total / 100, // convert to usd
-                stripeSessionId: sessionId
-            })
+		if (session.payment_status === "paid") {
+			if (session.metadata.couponCode) {
+				await Coupon.findOneAndUpdate(
+					{
+						code: session.metadata.couponCode,
+						userId: session.metadata.userId,
+					},
+					{
+						isActive: false,
+					}
+				);
+			}
 
-            newOrder.save();
-            res.status(200).json({
-                success: true,
-                message: "Thanh toan thanh cong",
-                orderId: newOrder._id
-            })
-        }
+			// create a new Order
+			const products = JSON.parse(session.metadata.products);
+			const newOrder = new orderModel({
+				user: session.metadata.userId,
+				products: products.map((product) => ({
+					product: product.id,
+					quantity: product.quantity,
+					price: product.price,
+				})),
+				totalAmount: session.amount_total / 100, // convert from cents to dollars,
+				stripeSessionId: sessionId,
+			});
+
+			await newOrder.save();
+
+			res.status(200).json({
+				success: true,
+				message: "Payment successful, order created, and coupon deactivated if used.",
+				orderId: newOrder._id,
+			});
+		}
     } catch (error) {
         console.log("Lỗi server checkout success", error.message);
         res.status(500).json({ message:"Lỗi server", error: error.message });

@@ -1,6 +1,7 @@
 import {create} from "zustand"
 import axios from "../lib/axios"
 import {toast} from "react-hot-toast"
+import axiosInstance from "../lib/axios"
 
 export const useCartStore = create((set, get)=>( {
     cart: [],
@@ -9,6 +10,31 @@ export const useCartStore = create((set, get)=>( {
     subtotal:0,
     isCouponApplied: false,
 
+    getMyyCoupon: async ()=> {
+        try {
+            const res = await axios.get("/coupons")
+            console.log("coupon", res)
+            set({coupon: res.data})
+        } catch (error) {
+            console.log("error get coupon", error.message)
+        }
+    },
+    applyCoupon: async(code)=> {
+        try {
+            const res = await axios.post(`/coupons/validate`, {code: code})
+        set({coupon: res.data, isCouponApplied: true})
+        get().caculateTotal()
+        toast.success("Nhập mã thành công!")
+        } catch (error) {
+            toast.error(error.response.data.message || "Nhập mã thất bại")
+        }
+    },
+    removeCoupon: async()=> {
+        set({coupon: null, isCouponApplied: false})
+        get().caculateTotal()
+        toast.success("Xoa ma khuyen mai thanh cong")
+    },
+    
     getCartItem: async()=> {
         try {
             const res = await axios.get("/cart")
@@ -67,4 +93,8 @@ export const useCartStore = create((set, get)=>( {
 
         set({subtotal, total})
     },
+    clearCart: async()=> {
+        set({cart: [], total: 0, subtotal: 0, coupon: null})
+    },
+    
 }))
