@@ -1,43 +1,46 @@
 import e from "express";
-import bcrypt from "bcryptjs"
+import bcrypt from "bcryptjs";
 
 import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema(
+  {
     name: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
     email: {
-        type: String,
-        required: true,
-        unique: true,
+      type: String,
+      required: true,
+      unique: true,
     },
     password: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
-    cardItems: [
-        {
-            quantity:{
-                type:Number,
-                default: 1
-            },
-            products: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Products"
-            }
-        }
+    cartItems: [
+      {
+        quantity: {
+          type: Number,
+          default: 1,
+        },
+        products: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Products",
+        },
+      },
     ],
     role: {
-        type: String,
-        enum: ["customer", "admin"],
-        default: "customer"
+      type: String,
+      enum: ["customer", "admin"],
+      default: "customer",
     },
     // createAt and updateAt
-}, {
-    timestamps: true
-})
+  },
+  {
+    timestamps: true,
+  }
+);
 
 // Pre hook to hash password before saving to database
 // userSchema.pre("save", async function (next) {
@@ -62,4 +65,4 @@ const userSchema = new mongoose.Schema({
 //     }
 // }
 
-export default mongoose.model("Users", userSchema)
+export default mongoose.model("Users", userSchema);

@@ -6,13 +6,10 @@ import { useEffect } from "react";
 const ProductsList = () => {
   const { deleteProduct, toggleFeaturedProduct, products, fetchAllProducts } = useProductStore();
 
-//   const { fetchAllProducts } = useProductStore();
 
   useEffect(() => {
     fetchAllProducts();
   }, [fetchAllProducts]);
-
-  console.log("products", products);
 
   return (
     <motion.div
@@ -79,7 +76,7 @@ const ProductsList = () => {
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-300">
-                  ${product.price.toFixed(2)}
+                  ${product.price}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
